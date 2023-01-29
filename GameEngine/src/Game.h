@@ -4,11 +4,13 @@
 #include <SDL.h>
 
 class Game {
+	//public methods are the public api. application programming interface.
 	public:
 		Game();
 		~Game();
 		void Initialize(int window_width = 0, int window_height = 0);
 		void Run();
+		void Setup();
 		void ProcessInput();
 		void Update();
 		void Render();
