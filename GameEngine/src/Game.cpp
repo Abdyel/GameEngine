@@ -1,8 +1,13 @@
 #include "Game.h"
 #include <SDL.h>
+#include <SDL_image.h>
+#include <glm/glm.hpp>
 #include <iostream>
 
 Game::Game() {
+	isRunning = NULL;
+	windowWidth = 0;
+	windowHeight = 0;
 	window = NULL;//initializing window as null
 	renderer = NULL;//initializing renderer as null
 	std::cout << "game constructor called" << std::endl;
@@ -10,7 +15,7 @@ Game::Game() {
 Game::~Game() {
 	std::cout << "game destructor called" << std::endl;
 }
-
+//Game Initialize is used for setting up SDL window and SDL renderer
 void Game::Initialize(int window_width, int window_height) {
 	//Checks to make sure sdl can initialize proscesses
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -65,23 +70,63 @@ void Game::Initialize(int window_width, int window_height) {
 		return;
 	}
 
-	//Line below is used to set a windowed fullscreen mode of program
-	//SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	//if game window is initialized with non defualt values set a windowed fullscreen mode of program
+	if (window_width != 0 && window_height != 0)
+	{
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	}
 
 	//sets is running variable to tru so long as all sdl process are initialized
 	isRunning = true;
 }
 
-void Game::Setup() {
-	//TODO: setup game objects
-}
+//JUST FOR TESTING
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
 
 void Game::Run() {
+	Setup();
 	while (isRunning) {
 		ProcessInput();
 		Update();
 		Render();
 	}
+}
+
+void Game::Setup() {
+	//setup game object
+	playerPosition = glm::vec2(10.0,20.0);
+	playerVelocity = glm::vec2(0.5,0.0);
+}
+
+void Game::Update() {
+	playerPosition.x += playerVelocity.x;
+	playerPosition.y += playerVelocity.y;
+}
+
+void Game::Render() {
+	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);//draws background of window
+	SDL_RenderClear(renderer);//sets background to the above color of renderer.
+
+	//draw a PNG texture
+	SDL_Surface* surface = IMG_Load("assets/images/tank-tiger-right.png");//creates surface of a png image
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);//creates texture from the surface that can be rendered
+	SDL_FreeSurface(surface);//clears surface and frees it from memory
+
+	//creates SDL rectangle that will bind the size and location of a rendered texture
+	SDL_Rect dstRect = 
+	{ 
+		static_cast<int>(playerPosition.x), //x location is decided by player position vector
+		static_cast<int>(playerPosition.y), //y location is decided by player position vector
+		32, 
+		32
+	};
+	//renderer copys information from texture, (renderer, texture, portion of text that will be used, address SDL_primitve for location and size of texture)
+	SDL_RenderCopy(renderer, texture, NULL, &dstRect);//NULL uses for size of texture
+	SDL_DestroyTexture(texture);//frees memory of texture
+
+
+	SDL_RenderPresent(renderer);//presents what is on renderer to window
 }
 
 void Game::ProcessInput() {
@@ -102,26 +147,6 @@ void Game::ProcessInput() {
 		}
 
 	}
-}
-
-void Game::Update() {
-
-}
-
-void Game::Render() {
-	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);//draws background of window
-	SDL_RenderClear(renderer);//sets background to the above color of renderer.
-
-	/*draw a rectangle, PosX, Posy, Width, height primitave type.
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_Rect player = {10,10, 20, 20};//creates the struct.
-	SDL_RenderFillRect(renderer, &player);//draws struct. naming renderer and refference of player.
-	*/
-
-
-
-	SDL_RenderPresent(renderer);//presents what is on renderer to window
-
 }
 
 void Game::Destroy() {
