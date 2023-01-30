@@ -4,7 +4,7 @@ int main(int argc, char* argv[]) {
     //TODO: start game loop
     Game game;
 
-    game.Initialize();
+    game.Initialize(1920, 1080);
     game.Run();
     game.Destroy();
 
