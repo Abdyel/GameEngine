@@ -1,26 +1,27 @@
 #include "Game.h"
+#include "../Logger/Logger.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
 Game::Game() {
-	isRunning = NULL;
+	isRunning = false;
 	windowWidth = 0;
 	windowHeight = 0;
 	window = NULL;//initializing window as null
 	renderer = NULL;//initializing renderer as null
-	std::cout << "game constructor called" << std::endl;
+	Logger::Log("game constructor called");
 }
 Game::~Game() {
-	std::cout << "game destructor called" << std::endl;
+	Logger::Log("game destructor called");
 }
 //Game Initialize is used for setting up SDL window and SDL renderer
 void Game::Initialize(int window_width, int window_height) {
 	//Checks to make sure sdl can initialize proscesses
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 	{
-		std::cerr << "ERROR: unable to initialize SDL." << std::endl;
+		Logger::Err("ERROR: unable to initialize SDL.");
 		return;
 	}
 
@@ -54,7 +55,7 @@ void Game::Initialize(int window_width, int window_height) {
 	//Checks to make sure window was able to be created
 	if (!window)
 	{
-		std::cerr << "ERROR: could not create SDL window." << std::endl;
+		Logger::Err("ERROR: could not create SDL window.");
 		return;
 	}
 
@@ -66,7 +67,7 @@ void Game::Initialize(int window_width, int window_height) {
 	//Checks to make sure window was able to be created
 	if (!renderer)
 	{
-		std::cerr << "ERROR: could not create SDL renderer." << std::endl;
+		Logger::Err("ERROR: could not create SDL renderer.");
 		return;
 	}
 
@@ -79,6 +80,25 @@ void Game::Initialize(int window_width, int window_height) {
 	//sets is running variable to tru so long as all sdl process are initialized
 	isRunning = true;
 }
+//Controls time the run function preforms game loop. not to be controled by how fast processor is.
+void Game::timeControl() {
+	//calculates time to wait for 
+	int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
+	
+	//checks timeToWait to make sure it is a valid value.S 
+	if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME)
+	{
+		SDL_Delay(timeToWait);
+	}
+
+	//difference in ticks from last frame. converted to second
+	//this creates a pixels per second relationship within update method.
+	//use this time for any moving game object by multiplying it with deltatime.
+	deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+
+	//store frame time
+	millisecsPreviousFrame = SDL_GetTicks();
+}
 
 //JUST FOR TESTING
 glm::vec2 playerPosition;
@@ -90,18 +110,20 @@ void Game::Run() {
 		ProcessInput();
 		Update();
 		Render();
+		timeControl();
 	}
 }
 
+//method used to setup game object location, size, etc...
 void Game::Setup() {
 	//setup game object
 	playerPosition = glm::vec2(10.0,20.0);
-	playerVelocity = glm::vec2(0.5,0.0);
+	playerVelocity = glm::vec2(500.0,0.0);
 }
 
 void Game::Update() {
-	playerPosition.x += playerVelocity.x;
-	playerPosition.y += playerVelocity.y;
+	playerPosition.x += playerVelocity.x * deltaTime;
+	playerPosition.y += playerVelocity.y * deltaTime;
 }
 
 void Game::Render() {
