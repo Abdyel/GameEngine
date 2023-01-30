@@ -2,6 +2,8 @@
 #define ECS_H
 #include <bitset>
 #include <vector>
+#include <unordered_map>
+#include <typeIndex>
 
 /////////////////////////////////////////////////////////////////////////////
 //create signature datatype using bitset to track which components an enitiy has
@@ -124,7 +126,34 @@ class Registry {
 		int numEntities = 0;
 		//Vector of component pools, each pool contains all the data for each type of component
 		//vector index is the component type id.
+		//pool index is the entity id.
 		std::vector<IPool*> componentPools;
+
+		//Vector of component signatures.
+		//The signature identifies which components are applied to an entity
+		//(vector index = entity id)
+		std::vector<Signature> entityComponenetSignature;
+
+		//map of active systems, index = system typeid
+		std::unordered_map<std::type_index, System*> systems;
+
+
+	public:
+		Registry() = default;
+
+		// TODO:
+		// CreateEntity()
+		// KillEntity()
+		//
+		// AddComponent(Entity entity)
+		// RemoveComponent(Entity entity)
+		// HasComponent(Entity entity)
+		// 
+		// AddSystem()
+		// RemoveSystem
+		// HasSystem()
+		// GetSystem()
+		//
 };
 
 
