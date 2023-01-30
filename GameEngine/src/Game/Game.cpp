@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "../Logger/Logger.h"
+#include "../ECS/ECS.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
@@ -94,15 +95,11 @@ void Game::timeControl() {
 	//difference in ticks from last frame. converted to second
 	//this creates a pixels per second relationship within update method.
 	//use this time for any moving game object by multiplying it with deltatime.
-	deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+	deltaTime = ((SDL_GetTicks() - millisecsPreviousFrame) / 1000.0);
 
 	//store frame time
 	millisecsPreviousFrame = SDL_GetTicks();
 }
-
-//JUST FOR TESTING
-glm::vec2 playerPosition;
-glm::vec2 playerVelocity;
 
 void Game::Run() {
 	Setup();
@@ -116,36 +113,23 @@ void Game::Run() {
 
 //method used to setup game object location, size, etc...
 void Game::Setup() {
-	//setup game object
-	playerPosition = glm::vec2(10.0,20.0);
-	playerVelocity = glm::vec2(500.0,0.0);
+	//TODO:
+	//Create entities
+
 }
 
 void Game::Update() {
-	playerPosition.x += playerVelocity.x * deltaTime;
-	playerPosition.y += playerVelocity.y * deltaTime;
+	//TODO:
+	//Update MovementSystem
+	//Update Systems...
 }
 
 void Game::Render() {
 	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);//draws background of window
 	SDL_RenderClear(renderer);//sets background to the above color of renderer.
 
-	//draw a PNG texture
-	SDL_Surface* surface = IMG_Load("assets/images/tank-tiger-right.png");//creates surface of a png image
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);//creates texture from the surface that can be rendered
-	SDL_FreeSurface(surface);//clears surface and frees it from memory
 
-	//creates SDL rectangle that will bind the size and location of a rendered texture
-	SDL_Rect dstRect = 
-	{ 
-		static_cast<int>(playerPosition.x), //x location is decided by player position vector
-		static_cast<int>(playerPosition.y), //y location is decided by player position vector
-		32, 
-		32
-	};
-	//renderer copys information from texture, (renderer, texture, portion of text that will be used, address SDL_primitve for location and size of texture)
-	SDL_RenderCopy(renderer, texture, NULL, &dstRect);//NULL uses for size of texture
-	SDL_DestroyTexture(texture);//frees memory of texture
+	//TODO: Render game objects
 
 
 	SDL_RenderPresent(renderer);//presents what is on renderer to window
@@ -166,6 +150,7 @@ void Game::ProcessInput() {
 			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
 				isRunning = false;
 			}
+			break;
 		}
 
 	}
