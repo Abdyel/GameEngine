@@ -79,15 +79,52 @@ void System::RequireComponent() {
 	const auto componentId = Component<TComponent>::GetId();
 	componentSignature.set(componentId);
 }
+//////////////////////////////////////////////////////////////////////////
+// P O O L
+//////////////////////////////////////////////////////////////////////////
+// A pool is just a vector {contigous data} of objects of type T
+// Pool is a wrapper for a vector of different types of components
+/////////////////////////////////////////////////////////////////////////
+class IPool {
+	public:
+		virtual ~IPool() = 0 {} //purely vitural type. Ipool used as interface to allow use in registry
+};
+
+template <typename T>
+class Pool : public IPool
+{
+	private:
+		std::vector<T> data;
+	public:
+		Pool(int size = 100)	{ data.resize(size); }
+		~Pool() = default;
+		bool isEmpty() const	{ return data.empty(); }
+		int GetSize() const		{ return data.size(); }
+		void Resize(int n)		{ data.resize(n); }
+		void Clear()			{ data.clear(); }
+		void Add(T object)		{ data.push_back(object); }
+		void Set(int index, T object) { data[index] = object; }
+		T& Get(int index)		{ return static_cast<T&> data[index]; }
+
+		T& operator [](unsigned int index) {
+			return data[index];
+		}
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 /// R E G I S T R Y
-/// //////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 /// The registry manages the creation and destruction of entities. as well
 /// as adding systems and adding components to entities
-/////////////////////////////////////////////////////////////////////////
-class Registry {
+//////////////////////////////////////////////////////////////////////////
 
+class Registry {
+	private:
+		int numEntities = 0;
+		//Vector of component pools, each pool contains all the data for each type of component
+		//vector index is the component type id.
+		std::vector<IPool*> componentPools;
 };
 
 
