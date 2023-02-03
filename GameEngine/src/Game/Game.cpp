@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "../Systems/MovementSystem.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Logger/Logger.h"
@@ -118,20 +119,25 @@ void Game::Run() {
 
 //method used to setup game object location, size, etc...
 void Game::Setup() {
+	//add the systems that need to be processed
+	registry->AddSystem<MovementSystem>();
+
 	//Create Entity
 	Entity tank = registry->CreateEntity();
 
 	//Add components to entity
 	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0);
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
-
-	tank.RemoveComponent<TransformComponent>();
 }
 
 void Game::Update() {
 	//TODO:
 	//Update MovementSystem
 	//Update Systems...
+	registry->GetSystem<MovementSystem>().Update();
+
+	//Update the registry to process the entites that are waiting to be created or destroyed
+	registry->Update();
 }
 
 void Game::Render() {

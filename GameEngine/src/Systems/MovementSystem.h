@@ -1,24 +1,33 @@
 #ifndef MOVEMENTSYSTEM_H
 #define MOVEMENTSYSTEM_H
 
+#include "../ECS/ECS.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidBodyComponent.h"
+#include <string>
+
 //movement system inherits from System class
 class MovementSystem : public System {
 	public:
 		MovementSystem() {
-			//TODO: required Components
-				//Transform Components
-				//Velocity Components
+			RequireComponent<TransformComponent>();
+			RequireComponent<RigidBodyComponent>();
 		}
 		
-		void Update() {
-			//TODO: Logic called frame by frame
-			
-			/*
-				for (auto entity: GetEntities()) {
-					//update position based on its velocity
-					//every frame of the game look
-				}
-			*/
+		void Update() 
+		{
+			//Loop all entites that the system is interested in
+			for (auto entity : GetSystemEntities())
+			{
+				//you could use auto& to make it smaller. left it as reference transformcomponent to see what is happening better.
+				TransformComponent& transform = entity.GetComponent<TransformComponent>();
+				const RigidBodyComponent rigidbody = entity.GetComponent<RigidBodyComponent>();
+
+				transform.position.x += rigidbody.velocity.x;
+				transform.position.y += rigidbody.velocity.y;
+
+				Logger::Log("Entity ID: " + std::to_string(entity.GetId()) + " position is now (" + std::to_string(transform.position.x) +" ,"+ std::to_string(transform.position.x) + " )");
+			}
 		}
 };
 
