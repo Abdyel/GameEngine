@@ -157,28 +157,31 @@ class Registry {
 		void Update();
 		//method that will create a new entity and add it to entity to be added list
 		Entity CreateEntity();
+
+		///// Component related functions /////
 		//function that adds a component to an entity
-		template <typename TComponent, typename ...TArgs>
-		void AddComponent(Entity entity, TArgs&& ...args);
+		template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
 		//Function that will remove a component from an entity
-		template <typename TComponent> 
-		void RemoveComponent(Entity entity);
+		template <typename TComponent> void RemoveComponent(Entity entity);
+		//checks an entity to see if it has a specific component returns true if it does, false if it doesnt.
+		template <typename TComponent> bool HasComponent(Entity entity) const;
 
-		template <typename TComponent> 
-		bool HasComponent(Entity entity) const;
+		////// System related functions /////
+		//adds system to registry unordered map "systems"
+		template <typename TSystem, typename ...TArgs> void AddSystem(TArgs&& ...args);
+		//removes system from registry map
+		template <typename TSystem> void RemoveSystem();
+		//returns true or false if system is in regisrty map
+		template <typename TSystem> bool HasSystem() const;
+		//returns with system value inside of the unordered map "systems"
+		template <typename TSystem> TSystem& GetSystem() const;
 
-		//void AddEntityToSystem(Entity entitiy);
-		//
-		// TODO:
-		// 
-		//
-		// GetComponent(Entity entity)
-		//  
-		// AddSystem()
-		//
-
+		// checks the component signature of an entity and add the entity 
+		//     to the systems that are interested in it.
+		void AddEntityToSystems(Entity entity);
 };
 //implemented template fuctions from registry prototype
+/////// F U N C T I O N S   F O R   C O M P O N E N T S ///////
 template <typename TComponent, typename ...TArgs> 
 void Registry::AddComponent(Entity entity, TArgs&& ...args) 
 {
@@ -232,4 +235,27 @@ bool Registry::HasComponent(Entity entity) const
 	return entityComponenetSignatures[entityId].test(componentId);
 }
 
+/////// F U N C T I O N S   F O R   S Y S T E M S ///////
+template <typename TSystem, typename ...TArgs> 
+void Registry::AddSystem(TArgs&& ...args) {
+	TSystem* newSystem(new TSystem(std::forward<TArgs>(args)...));
+	systems.insert(std::make_pair(std::type_index(typeid(TSystem), newSystem));
+}
+
+template <typename TSystem>
+void Registry::RemoveSystem() {
+	auto system = systems.find(std::type_index(typeid(TSystem)));
+	systems.erase(system);
+}
+
+template <typename TSystem>
+bool Registry::HasSystem() const {
+	return system.find(std:type_index(typeid(TSystem))) != systems.end();
+}
+
+template <typename TSystem> 
+TSystem& Registry::GetSystem() const{
+	auto system = systems.find(std::type_index(typeid(TSystem)));
+	return *(std::static_pointer_cast<TSystem>(system->second));
+}
 #endif
