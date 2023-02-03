@@ -12,6 +12,9 @@ Game::Game() {
 	windowHeight = 0;
 	window = NULL;//initializing window as null
 	renderer = NULL;//initializing renderer as null
+
+	registry = std::make_unique<Registry>();
+
 	Logger::Log("game constructor called");
 }
 Game::~Game() {
@@ -100,7 +103,7 @@ void Game::timeControl() {
 	//store frame time
 	millisecsPreviousFrame = SDL_GetTicks();
 }
-
+//function that will start the game loop after initiaization of game
 void Game::Run() {
 	Setup();
 	while (isRunning) {
@@ -113,8 +116,9 @@ void Game::Run() {
 
 //method used to setup game object location, size, etc...
 void Game::Setup() {
-	//TODO:
-	//Create entities
+	Entity tank = registry->CreateEntity();
+	Entity truck = registry->CreateEntity();
+
 
 }
 

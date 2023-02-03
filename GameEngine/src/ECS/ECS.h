@@ -1,5 +1,6 @@
 #ifndef ECS_H
 #define ECS_H
+#include "../Logger/Logger.h"
 #include <bitset>
 #include <vector>
 #include <unordered_map>
@@ -141,7 +142,7 @@ class Registry {
 		//Vector of component pools, each pool contains all the data for each type of component
 		//vector index is the component type id.
 		//pool index is the entity id.
-		std::vector<IPool*> componentPools;
+		std::vector<std::shared_ptr<IPool>> componentPools;
 
 		//Vector of component signatures.
 		//The signature identifies which components are applied to an entity
@@ -149,11 +150,16 @@ class Registry {
 		std::vector<Signature> entityComponenetSignatures;
 
 		//map of active systems, index = system typeid
-		std::unordered_map<std::type_index, System*> systems;
+		std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
 
 	public:
 		//prototype registry constructor 
-		Registry() = default;
+		Registry() { 
+			Logger::Log("Registry constructor called"); 
+		}
+		~Registry(){
+			Logger::Log("Registry destructor called");
+		}
 		//update function that will update all entities, components, and systems in registry
 		void Update();
 		//method that will create a new entity and add it to entity to be added list
@@ -197,12 +203,12 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args)
 	//if component pool at index does not exist create a new component pool at index
 	if (!componentPools[componentId])
 	{
-		Pool<TComponent>* newComponentPool = new Pool<TComponent>();
+		std::shared_ptr<Pool<TComponent>> newComponentPool = std::make_shared<Pool<TComponent>>();
 		componentPools[componentId] = newComponentPool;
 	}
 
-	//get componet pool location that we will be attaching to an entityid to and the new component too
-	Pool<TComponent>* componentPool = componentPools[componentId];
+	//get component pool location that we will be attaching to an entityid to and the new component too
+	std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
 	//if component pool is to small to accomedate the entity increase size of pool
 	if (entityId >= componentPool->GetSize()) {
@@ -239,7 +245,7 @@ bool Registry::HasComponent(Entity entity) const
 /////// F U N C T I O N S   F O R   S Y S T E M S ///////
 template <typename TSystem, typename ...TArgs> 
 void Registry::AddSystem(TArgs&& ...args) {
-	TSystem* newSystem(new TSystem(std::forward<TArgs>(args)...));
+	std::shared_ptr<TSystem> newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
 	systems.insert(std::make_pair(std::type_index(typeid(TSystem), newSystem)));
 }
 
