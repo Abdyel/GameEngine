@@ -249,6 +249,7 @@ void Registry::RemoveComponent(Entity entity) {
 	const auto componentId = Component<TComponent>::GetId();
 	const auto entityId = entity.GetId();
 	entityComponenetSignatures[entityId].set(componentId, false);
+	Logger::Log("Component ID [" + std::to_string(componentId) + "] was removed from entity ID: " + std::to_string(entityId));
 }
 
 template <typename TComponent>
