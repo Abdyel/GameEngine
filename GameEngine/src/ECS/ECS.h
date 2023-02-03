@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <typeIndex>
 #include <set>
+#include <memory>
 /////////////////////////////////////////////////////////////////////////////
 // S I G N A T U R E
 /////////////////////////////////////////////////////////////////////////////
@@ -229,7 +230,7 @@ void Registry::RemoveComponent(Entity entity) {
 template <typename TComponent>
 bool Registry::HasComponent(Entity entity) const 
 {
-	const auto componentId = component<TComponent>::GetId();
+	const auto componentId = Component<TComponent>::GetId();
 	const auto entityId = entity.GetId();
 	//test signature within Signature of the index location of entityid. 
 	return entityComponenetSignatures[entityId].test(componentId);
@@ -239,7 +240,7 @@ bool Registry::HasComponent(Entity entity) const
 template <typename TSystem, typename ...TArgs> 
 void Registry::AddSystem(TArgs&& ...args) {
 	TSystem* newSystem(new TSystem(std::forward<TArgs>(args)...));
-	systems.insert(std::make_pair(std::type_index(typeid(TSystem), newSystem));
+	systems.insert(std::make_pair(std::type_index(typeid(TSystem), newSystem)));
 }
 
 template <typename TSystem>
@@ -250,7 +251,7 @@ void Registry::RemoveSystem() {
 
 template <typename TSystem>
 bool Registry::HasSystem() const {
-	return system.find(std:type_index(typeid(TSystem))) != systems.end();
+	return (system.find(std::type_index(typeid(TSystem))) != systems.end());
 }
 
 template <typename TSystem> 
