@@ -22,6 +22,9 @@ typedef std::bitset<MAX_COMPONENTS> Signature;
 /////////////////////////////////////////////////////////////////////////////
 /// entities are objects that only give an identifier to a game object
 /////////////////////////////////////////////////////////////////////////////
+
+class Registry;//forward declaration
+
 class Entity {
 	public:
 		Entity(int id) : id(id) {}; //using initializer list to initialized id
@@ -37,6 +40,15 @@ class Entity {
 		bool operator >(const Entity& other) const { return id > other.id; }
 		bool operator <(const Entity& other) const { return id < other.id; }
 
+		// Hold a pointer to the entity's owner registry 
+		Registry* registry;
+
+		// methods to control registry through the entity.
+		//surves no purpose beside making syntax easier when adding components to entities.
+		template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
+		template <typename TComponent> void RemoveComponent();
+		template <typename TComponent> bool HasComponent() const;
+		template <typename TComponent> TComponent& GetComponent() const;
 	private:
 		int id;
 };
@@ -174,6 +186,8 @@ class Registry {
 		template <typename TComponent> void RemoveComponent(Entity entity);
 		//checks an entity to see if it has a specific component returns true if it does, false if it doesnt.
 		template <typename TComponent> bool HasComponent(Entity entity) const;
+		//returns component
+		template <typename TComponent> TComponent& GetComponent(Entity entity) const;
 
 		////// System related functions /////
 		//adds system to registry unordered map "systems"
@@ -246,6 +260,15 @@ bool Registry::HasComponent(Entity entity) const
 	return entityComponenetSignatures[entityId].test(componentId);
 }
 
+template <typename TComponent>
+TComponent& Registry::GetComponent(Entity entity) const
+{
+	const auto componentId = Component<TComponent>::GetId();
+	const auto entityId = entity.GetId();
+	auto componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+	return componentPool->Get(entityId);
+}
+
 /////// F U N C T I O N S   F O R   S Y S T E M S ///////
 template <typename TSystem, typename ...TArgs> 
 void Registry::AddSystem(TArgs&& ...args) {
@@ -269,4 +292,22 @@ TSystem& Registry::GetSystem() const{
 	auto system = systems.find(std::type_index(typeid(TSystem)));
 	return *(std::static_pointer_cast<TSystem>(system->second));
 }
+
+
+/////// F U N C T I O N S   F O R   E N T I T I E S ///////
+//These functions are located in entity however they are just calling the registry template fuctiosn above
+template <typename TComponent, typename ...TArgs> 
+void Entity::AddComponent(TArgs&& ...args) {
+	registry->AddComponent<TComponent>(*this, std::forward<TArgs>(args)...);
+}
+template <typename TComponent> void Entity::RemoveComponent() {
+	registry->RemoveComponent<TComponent>(*this);
+}
+template <typename TComponent> bool Entity::HasComponent() const {
+	return registry->HasComponent<TComponent>(*this);
+}
+template <typename TComponent> TComponent& Entity::GetComponent() const {
+	return registry->GetComponent<TComponent>(*this);
+}
+
 #endif
