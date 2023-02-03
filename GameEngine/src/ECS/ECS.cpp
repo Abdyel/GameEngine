@@ -3,6 +3,8 @@
 #include <string>
 
 //TODO: implement ECS classes
+//initialize nextId int, within IComopnent
+int IComponent::nextId = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Entity implementations

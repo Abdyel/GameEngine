@@ -47,7 +47,7 @@ struct IComponent {
 };
 //used to assign a unique ids to a component type. generic TComponent
 template <typename TComponent>
-class Component : IComponent {
+class Component: public IComponent {
 	// Returns the unique id of the component<T>
 	static int GetId() {
 		static auto id = nextId++;
@@ -132,9 +132,11 @@ class Registry {
 	private:
 		//management of entities
 		int numEntities = 0;
+
 		//Sets of entites that are flagged to be added or removed. in next regisrty update.
 		std::set<Entity> entitiesToBeAdded;
 		std::set<Entity> entitiesToBeKilled;
+
 		//Vector of component pools, each pool contains all the data for each type of component
 		//vector index is the component type id.
 		//pool index is the entity id.
@@ -148,15 +150,22 @@ class Registry {
 		//map of active systems, index = system typeid
 		std::unordered_map<std::type_index, System*> systems;
 
-
 	public:
+		//prototype registry constructor 
 		Registry() = default;
-		
+		//update function that will update all entities, components, and systems in registry
 		void Update();
-
+		//method that will create a new entity and add it to entity to be added list
 		Entity CreateEntity();
+		//function that adds a component to an entity
+		template <typename TComponent, typename ...TArgs>
+		void AddComponent(Entity entity, TArgs&& ...args);
+		//Function that will remove a component from an entity
+		template <typename TComponent> 
+		void RemoveComponent(Entity entity);
 
-		template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
+		template <typename TComponent> 
+		bool HasComponent(Entity entity) const;
 
 		//void AddEntityToSystem(Entity entitiy);
 		//
@@ -169,9 +178,10 @@ class Registry {
 		//
 
 };
-
+//implemented template fuctions from registry prototype
 template <typename TComponent, typename ...TArgs> 
-void Registry::AddComponent(Entity entity, TArgs&& ...args){
+void Registry::AddComponent(Entity entity, TArgs&& ...args) 
+{
 	//get component id and entity id that we will be attac
 	const auto componentId = Component<TComponent>::GetId();
 	const auto entityId = entity.GetId();
@@ -206,5 +216,20 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
 	entityComponenetSignatures[entityId].set(componentId);
 }
 
+template <typename TComponent>
+void Registry::RemoveComponent(Entity entity) {
+	const auto componentId = Component<TComponent>::GetId();
+	const auto entityId = entity.GetId();
+	entityComponenetSignatures[entityId].set(componentId, false);
+}
+
+template <typename TComponent>
+bool Registry::HasComponent(Entity entity) const 
+{
+	const auto componentId = component<TComponent>::GetId();
+	const auto entityId = entity.GetId();
+	//test signature within Signature of the index location of entityid. 
+	return entityComponenetSignatures[entityId].test(componentId);
+}
 
 #endif
