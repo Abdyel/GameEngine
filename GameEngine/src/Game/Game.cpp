@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidBodyComponent.h"
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include <SDL.h>
@@ -116,10 +118,12 @@ void Game::Run() {
 
 //method used to setup game object location, size, etc...
 void Game::Setup() {
+	//Create Entity
 	Entity tank = registry->CreateEntity();
-	Entity truck = registry->CreateEntity();
 
-
+	//Add components to entity
+	registry->AddComponent<TransformComponent>(tank, glm::vec2(10.0, 30.0),glm::vec2(1.0,1.0),0);
+	registry->AddComponent<RigidBodyComponent>(tank, glm::vec2(50.0, 0.0));
 }
 
 void Game::Update() {

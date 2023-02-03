@@ -7,6 +7,7 @@
 #include <typeIndex>
 #include <set>
 #include <memory>
+#include <string>
 /////////////////////////////////////////////////////////////////////////////
 // S I G N A T U R E
 /////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ struct IComponent {
 template <typename TComponent>
 class Component: public IComponent {
 	// Returns the unique id of the component<T>
+	public:
 	static int GetId() {
 		static auto id = nextId++;
 		return id;
@@ -224,6 +226,8 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args)
 
 	//turn the component signature for the entity as "on" for the given component.
 	entityComponenetSignatures[entityId].set(componentId);
+
+	Logger::Log("Component ID [" + std::to_string(componentId) + "] was added to entity ID: " + std::to_string(entityId));
 }
 
 template <typename TComponent>
