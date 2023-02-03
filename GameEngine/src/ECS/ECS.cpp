@@ -1,13 +1,19 @@
 #include "ECS.h"
+#include "../Logger/Logger.h"
+#include <string>
 
 //TODO: implement ECS classes
 
+////////////////////////////////////////////////////////////////////////////////
+//Entity implementations
+////////////////////////////////////////////////////////////////////////////////
 int Entity::GetId() const {
 	return id; //encapsulation of member id of entity class.
 }
 
-
-
+////////////////////////////////////////////////////////////////////////////////
+//System Implementations
+////////////////////////////////////////////////////////////////////////////////
 void System::AddEntityToSystem(Entity entity) {
 	entities.push_back(entity);
 }
@@ -28,3 +34,26 @@ const Signature& System::GetComponentSignature() const {
 	return componentSignature;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//Registry Implementations
+////////////////////////////////////////////////////////////////////////////////
+ 
+//inserts 
+Entity Registry::CreateEntity() {
+	int entityId;
+
+	entityId = numEntities++;//incremenet number of entities
+
+	//create new entity with new id and add enitiy to vector to be added.
+	Entity entity(entityId);
+	entitiesToBeAdded.insert(entity);
+
+	Logger::Log("Entity Created with id = " + std::to_string(entityId));
+
+	return entity;
+}
+
+void Registry::Update() {
+	//TODO: Add the entities that are waiting to be created to the active Systems
+	//TODO: Remove the entities that are waiting to be killed from active systems
+}

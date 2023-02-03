@@ -4,10 +4,13 @@
 #include <vector>
 #include <unordered_map>
 #include <typeIndex>
-
+#include <set>
+/////////////////////////////////////////////////////////////////////////////
+// S I G N A T U R E
 /////////////////////////////////////////////////////////////////////////////
 //create signature datatype using bitset to track which components an enitiy has
 //and keeps track of which enities a system is interested in.
+/////////////////////////////////////////////////////////////////////////////
 const unsigned int MAX_COMPONENTS = 32;
 typedef std::bitset<MAX_COMPONENTS> Signature;
 /////////////////////////////////////////////////////////////////////////////
@@ -28,13 +31,15 @@ class Entity {
 		bool operator == (const Entity& other) const {return id == other.id;}
 		//operator overloaded to define the meaning of comparing two entities with !=
 		bool operator != (const Entity& other) const {return id != other.id;}
+		bool operator >(const Entity& other) const { return id > other.id; }
+		bool operator <(const Entity& other) const { return id < other.id; }
 
 	private:
 		int id;
 };
 /////////////////////////////////////////////////////////////////////////////
 // C O M P O N E N T
-// //////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //base structure for component class. Interface Component.
 struct IComponent {
 	protected://only usuable to inherited classes or part of class
@@ -55,6 +60,7 @@ class Component : IComponent {
 ///////////////////////////////////////////////////////////////////////////
 // The system processes entities that contain a specific signature
 ///////////////////////////////////////////////////////////////////////////
+
 class System {
 	public:
 		System() = default;
@@ -81,12 +87,14 @@ void System::RequireComponent() {
 	const auto componentId = Component<TComponent>::GetId();
 	componentSignature.set(componentId);
 }
+
 //////////////////////////////////////////////////////////////////////////
 // P O O L
 //////////////////////////////////////////////////////////////////////////
 // A pool is just a vector {contigous data} of objects of type T
 // Pool is a wrapper for a vector of different types of components
 /////////////////////////////////////////////////////////////////////////
+
 class IPool {
 	public:
 		virtual ~IPool() = 0 {} //purely vitural type. Ipool used as interface to allow use in registry
@@ -106,13 +114,12 @@ class Pool : public IPool
 		void Clear()			{ data.clear(); }
 		void Add(T object)		{ data.push_back(object); }
 		void Set(int index, T object) { data[index] = object; }
-		T& Get(int index)		{ return static_cast<T&> data[index]; }
+		T& Get(int index)		{ return static_cast<T&>(data[index]); }
 
 		T& operator [](unsigned int index) {
 			return data[index];
 		}
 };
-
 
 //////////////////////////////////////////////////////////////////////////
 /// R E G I S T R Y
@@ -123,7 +130,11 @@ class Pool : public IPool
 
 class Registry {
 	private:
+		//management of entities
 		int numEntities = 0;
+		//Sets of entites that are flagged to be added or removed. in next regisrty update.
+		std::set<Entity> entitiesToBeAdded;
+		std::set<Entity> entitiesToBeKilled;
 		//Vector of component pools, each pool contains all the data for each type of component
 		//vector index is the component type id.
 		//pool index is the entity id.
@@ -132,7 +143,7 @@ class Registry {
 		//Vector of component signatures.
 		//The signature identifies which components are applied to an entity
 		//(vector index = entity id)
-		std::vector<Signature> entityComponenetSignature;
+		std::vector<Signature> entityComponenetSignatures;
 
 		//map of active systems, index = system typeid
 		std::unordered_map<std::type_index, System*> systems;
@@ -140,21 +151,60 @@ class Registry {
 
 	public:
 		Registry() = default;
+		
+		void Update();
 
+		Entity CreateEntity();
+
+		template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
+
+		//void AddEntityToSystem(Entity entitiy);
+		//
 		// TODO:
-		// CreateEntity()
-		// KillEntity()
-		//
-		// AddComponent(Entity entity)
-		// RemoveComponent(Entity entity)
-		// HasComponent(Entity entity)
 		// 
-		// AddSystem()
-		// RemoveSystem
-		// HasSystem()
-		// GetSystem()
 		//
+		// GetComponent(Entity entity)
+		//  
+		// AddSystem()
+		//
+
 };
+
+template <typename TComponent, typename ...TArgs> 
+void Registry::AddComponent(Entity entity, TArgs&& ...args){
+	//get component id and entity id that we will be attac
+	const auto componentId = Component<TComponent>::GetId();
+	const auto entityId = entity.GetId();
+	//if component id is large than the componentPools vector size, resize to fit new component
+	if (componentId >= componentPools.size())
+	{
+		componentPools.resize(componentId + 1, nullptr);
+	}
+	//if component pool at index does not exist create a new component pool at index
+	if (!componentPools[componentId])
+	{
+		Pool<TComponent>* newComponentPool = new Pool<TComponent>();
+		componentPools[componentId] = newComponentPool;
+	}
+
+	//get componet pool location that we will be attaching to an entityid to and the new component too
+	Pool<TComponent>* componentPool = componentPools[componentId];
+
+	//if component pool is to small to accomedate the entity increase size of pool
+	if (entityId >= componentPool->GetSize()) {
+		componentPool->Resize(numEntities);
+	}
+
+	//create new component using default constructor
+	TComponent newComponent(std::forward<TArgs>(args)...);
+
+	//place the new component created at the entity's indexed position
+	//Place new componet into pool with entityid
+	componentPool->Set(entityId, newComponent);
+
+	//turn the component signature for the entity as "on" for the given component.
+	entityComponenetSignatures[entityId].set(componentId);
+}
 
 
 #endif
