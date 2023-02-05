@@ -1,7 +1,9 @@
 #include "Game.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/RenderSystem.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Components/SpriteComponent.h"
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include <SDL.h>
@@ -121,30 +123,38 @@ void Game::Run() {
 void Game::Setup() {
 	//add the systems that need to be processed
 	registry->AddSystem<MovementSystem>();
+	registry->AddSystem<RenderSystem>();
 
 	//Create Entity
 	Entity tank = registry->CreateEntity();
 
 	//Add components to entity
 	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0);
-	tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
+	tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 30.0));
+	tank.AddComponent<SpriteComponent>(10, 10);
+
+	Entity truck = registry->CreateEntity();
+
+	//Add components to entity
+	truck.AddComponent<TransformComponent>(glm::vec2(40.0, 100.0), glm::vec2(1.0, 1.0), 0);
+	truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
+	truck.AddComponent<SpriteComponent>(10, 50);
 }
 
 void Game::Update() {
-	//TODO:
-	//Update MovementSystem
-	//Update Systems...
-	registry->GetSystem<MovementSystem>().Update(deltaTime);
-
 	//Update the registry to process the entites that are waiting to be created or destroyed
 	registry->Update();
+	//System updates positions of entites based on rigidBody values.
+	registry->GetSystem<MovementSystem>().Update(deltaTime);
+
 }
 
 void Game::Render() {
 	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);//draws background of window
 	SDL_RenderClear(renderer);//sets background to the above color of renderer.
 
-
+	//System renders images to the location based on transform component
+	registry->GetSystem<RenderSystem>().Update(renderer);
 	//TODO: Render game objects
 
 
