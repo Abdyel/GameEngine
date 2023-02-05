@@ -134,7 +134,7 @@ void Game::Update() {
 	//TODO:
 	//Update MovementSystem
 	//Update Systems...
-	registry->GetSystem<MovementSystem>().Update();
+	registry->GetSystem<MovementSystem>().Update(deltaTime);
 
 	//Update the registry to process the entites that are waiting to be created or destroyed
 	registry->Update();

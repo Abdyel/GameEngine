@@ -14,7 +14,7 @@ class MovementSystem : public System {
 			RequireComponent<RigidBodyComponent>();
 		}
 		
-		void Update() 
+		void Update(double deltaTime) 
 		{
 			//Loop all entites that the system is interested in
 			for (auto entity : GetSystemEntities())
@@ -23,8 +23,8 @@ class MovementSystem : public System {
 				TransformComponent& transform = entity.GetComponent<TransformComponent>();
 				const RigidBodyComponent rigidbody = entity.GetComponent<RigidBodyComponent>();
 
-				transform.position.x += rigidbody.velocity.x;
-				transform.position.y += rigidbody.velocity.y;
+				transform.position.x += rigidbody.velocity.x * deltaTime;
+				transform.position.y += rigidbody.velocity.y * deltaTime;
 
 				Logger::Log("Entity ID: " + std::to_string(entity.GetId()) + " position is now (" + std::to_string(transform.position.x) +" ,"+ std::to_string(transform.position.x) + " )");
 			}
