@@ -23,6 +23,7 @@ class Game {
 		void Render();
 		void timeControl();
 		void Destroy();
+		void LoadScene(int sceneId);
 
 		int windowWidth;
 		int windowHeight;
