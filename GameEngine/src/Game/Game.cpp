@@ -129,23 +129,22 @@ void Game::Setup() {
 	
 	//Add assets to asset store
 	
-	assetStore->AddTexture(renderer,"tank-image", "./asset/images/tank-panther-right.png");
-	assetStore->AddTexture(renderer,"truck-image", "./asset/images/truck-ford-right");
+	assetStore->AddTexture(renderer,"tank-image", "./assets/images/tank-panther-right.png");
+	assetStore->AddTexture(renderer,"truck-image", "./assets/images/truck-ford-down.png");
 	
 	//Create Entity
 	Entity tank = registry->CreateEntity();
-
 	//Add components to entity
-	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0);
-	tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 30.0));
-	tank.AddComponent<SpriteComponent>("tank-image", 10, 10);
+	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(2.0, 2.0), 0.0);
+	tank.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
+	tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
 
+	//create entity
 	Entity truck = registry->CreateEntity();
-
 	//Add components to entity
-	truck.AddComponent<TransformComponent>(glm::vec2(40.0, 100.0), glm::vec2(1.0, 1.0), 0);
-	truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
-	truck.AddComponent<SpriteComponent>("truck-image", 10, 50);
+	truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+	truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
+	truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
 }
 
 void Game::Update() {
@@ -161,7 +160,7 @@ void Game::Render() {
 	SDL_RenderClear(renderer);//sets background to the above color of renderer.
 
 	//System renders images to the location based on transform component
-	registry->GetSystem<RenderSystem>().Update(renderer);
+	registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
 	//TODO: Render game objects
 
 
