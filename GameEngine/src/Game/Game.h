@@ -2,8 +2,10 @@
 #define GAME_H
 
 #include "../ECS/ECS.h"
+#include "../AssetStore/AssetStore.h"
 #include <SDL.h>
 #include <memory>
+
 
 const int FPS = 30;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
@@ -32,6 +34,7 @@ class Game {
 		SDL_Window* window;
 		SDL_Renderer* renderer;
 
+		std::unique_ptr<AssetStore> assetStore;
 		std::unique_ptr<Registry> registry;
 };
 

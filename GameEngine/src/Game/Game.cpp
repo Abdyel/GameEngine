@@ -18,7 +18,9 @@ Game::Game() {
 	window = NULL;//initializing window as null
 	renderer = NULL;//initializing renderer as null
 
+	//makes the regitry for ECS and assetStore for textures, audio, and fonts
 	registry = std::make_unique<Registry>();
+	assetStore = std::make_unique<AssetStore>();
 
 	Logger::Log("game constructor called");
 }
@@ -124,21 +126,26 @@ void Game::Setup() {
 	//add the systems that need to be processed
 	registry->AddSystem<MovementSystem>();
 	registry->AddSystem<RenderSystem>();
-
+	
+	//Add assets to asset store
+	
+	assetStore->AddTexture(renderer,"tank-image", "./asset/images/tank-panther-right.png");
+	assetStore->AddTexture(renderer,"truck-image", "./asset/images/truck-ford-right");
+	
 	//Create Entity
 	Entity tank = registry->CreateEntity();
 
 	//Add components to entity
 	tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0);
 	tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 30.0));
-	tank.AddComponent<SpriteComponent>(10, 10);
+	tank.AddComponent<SpriteComponent>("tank-image", 10, 10);
 
 	Entity truck = registry->CreateEntity();
 
 	//Add components to entity
 	truck.AddComponent<TransformComponent>(glm::vec2(40.0, 100.0), glm::vec2(1.0, 1.0), 0);
 	truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
-	truck.AddComponent<SpriteComponent>(10, 50);
+	truck.AddComponent<SpriteComponent>("truck-image", 10, 50);
 }
 
 void Game::Update() {
