@@ -1,8 +1,10 @@
 #pragma once
-
+#include "../ECS/ECS.h"
 #include <map>
 #include <string>
 #include <SDL.h>
+#include <vector>
+#include <forward_list>
 
 class AssetStore {
 	private:

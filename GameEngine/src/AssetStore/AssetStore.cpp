@@ -1,6 +1,7 @@
 #include "AssetStore.h"	
 #include "../Logger/Logger.h"
 #include <SDL_image.h>
+#include <forward_list>
 
 AssetStore::AssetStore() {
 	Logger::Log("Asset Store Constructor Called.");

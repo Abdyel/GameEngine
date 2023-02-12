@@ -30,6 +30,7 @@ class Game {
 
 	private:
 		bool isRunning;
+		bool isDebug;
 		double deltaTime = 0;
 		int millisecsPreviousFrame = 0;
 		SDL_Window* window;
