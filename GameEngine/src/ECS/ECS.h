@@ -8,6 +8,7 @@
 #include <set>
 #include <memory>
 #include <string>
+#include <deque>
 /////////////////////////////////////////////////////////////////////////////
 // S I G N A T U R E
 /////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,7 @@ class Entity {
 		Entity(int id) : id(id) {}; //using initializer list to initialized id
 		Entity(const Entity& entity) = default; //overloaded constructor using default build.
 		int GetId() const;//getter method.
+		void Kill();//kills entity, removes from systems, and reallocates id to be reused
 
 		//operator overloading to define the meaning of creating an entities based on another
 		Entity& operator = (const Entity& other) = default;
@@ -83,7 +85,7 @@ class System {
 		virtual ~System() = default;
 
 		void AddEntityToSystem(Entity entity);
-		void RemoveEntitFromSystem(Entity entity);
+		void RemoveEntityFromSystem(Entity entity);
 		std::vector<Entity> GetSystemEntities() const;
 		const Signature& GetComponentSignature() const; //returns reference of a Signature
 
@@ -153,6 +155,9 @@ class Registry {
 		std::set<Entity> entitiesToBeAdded;
 		std::set<Entity> entitiesToBeKilled;
 
+		//List of available IDs that were previously used.
+		std::deque<int> freeIds;
+
 		//Vector of component pools, each pool contains all the data for each type of component
 		//vector index is the component type id.
 		//pool index is the entity id.
@@ -178,6 +183,7 @@ class Registry {
 		void Update();
 		//method that will create a new entity and add it to entity to be added list
 		Entity CreateEntity();
+		void KillEntity(Entity entity);
 
 		///// Component related functions /////
 		//function that adds a component to an entity
@@ -202,6 +208,9 @@ class Registry {
 		// checks the component signature of an entity and add the entity 
 		//     to the systems that are interested in it.
 		void AddEntityToSystems(Entity entity);
+		// removes enetiy from used systems
+		void RemoveEntityFromSystems(Entity entity);
+
 };
 //implemented template fuctions from registry prototype
 /////// F U N C T I O N S   F O R   C O M P O N E N T S ///////
